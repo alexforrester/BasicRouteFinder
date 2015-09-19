@@ -5,3 +5,33 @@
 .DS_Store
 /build
 /captures
+
+#built application files
+*.apk
+*.ap_
+
+# files for the dex VM
+*.dex
+
+# Java class files
+*.class
+
+# generated files
+bin
+gen
+.idea
+.idea/workspace.xml
+
+# Local configuration file (sdk path, etc)
+local.properties
+
+*.iml
+*.bin
+*.idea/
+build
+
+# Mac OS X clutter
+*.DS_Store
+
+# Windows clutter
+Thumbs.db

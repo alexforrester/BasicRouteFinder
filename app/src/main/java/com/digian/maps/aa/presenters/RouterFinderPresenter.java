@@ -2,6 +2,7 @@ package com.digian.maps.aa.presenters;
 
 import android.content.Context;
 import android.content.Intent;
+import android.location.Location;
 
 import com.digian.maps.aa.Constants;
 import com.digian.maps.aa.services.RouteFinderService;
@@ -29,9 +30,10 @@ public class RouterFinderPresenter {
         mRoutFinderView = routeFinderView;
     }
 
-    public void getRouteLegs(final String destination) {
+    public void getRouteLegs(final Location location, final String destination) {
         final Intent serviceIntent = new Intent(mContext,RouteFinderService.class);
         serviceIntent.setAction(Constants.ROUTE_FINDER_DESTINATION_PLOTTER);
+        serviceIntent.putExtra(Constants.ORIGIN_LOCATION, location);
         serviceIntent.putExtra(Constants.DESTINATION_LOCATION, destination);
         mContext.startService(serviceIntent);
     }

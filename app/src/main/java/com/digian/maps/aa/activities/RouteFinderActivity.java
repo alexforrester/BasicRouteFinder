@@ -77,7 +77,8 @@ public class RouteFinderActivity extends Activity implements OnMapReadyCallback,
             return;
         }
 
-        mRouterFinderPresenter.getRouteLegs(mDestinationLocation.getText().toString());
+        Location location = mMap.getMyLocation();
+        mRouterFinderPresenter.getRouteLegs(location, mDestinationLocation.getText().toString());
     }
 
     @VisibleForTesting
