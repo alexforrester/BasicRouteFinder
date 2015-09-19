@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">AA Route Finder</string>
+    <string name="R.string.go">GO</string>
+    <string name="no_text_entered">No Text Entered</string>
+</resources>
