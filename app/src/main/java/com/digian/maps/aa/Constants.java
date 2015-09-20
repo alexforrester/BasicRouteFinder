@@ -9,5 +9,5 @@ public class Constants {
     public static final String DESTINATION_LOCATION = "DESTINATION_LOCATION";
     public static final String ORIGIN_LOCATION = "ORIGIN_LOCATION";
     public static final String GOOGLE_DIRECTIONS_API_REQUEST_HOST = "https://maps.googleapis.com";
-    public static final String GOOGLE_DIRECTIONS_API_REQUEST_PATH = "";
+    public static final String GOOGLE_MAPS_KEY = "AIzaSyDkgbxWm3YsHn7OM7EkuVY6ltUpE2KFKgk";
 }

@@ -2,7 +2,6 @@ package com.digian.maps.aa.activities;
 
 import android.content.Context;
 import android.content.res.Resources;
-import android.widget.EditText;
 
 import com.digian.maps.aa.views.RouteFinderView;
 import com.google.android.gms.maps.MapFragment;
@@ -37,7 +36,7 @@ public class RouteFinderActivityTest extends TestCase {
     @Before
     public void setUp() {
         mClassUnderTest = spy(new RouteFinderActivity());
-        doReturn(mMapFragment).when(mClassUnderTest).getMapFragment();
+        doReturn(mMapFragment).when(mClassUnderTest).buildMapFragment();
         doNothing().when(mClassUnderTest).bindViews();
         doReturn(mResources).when(mClassUnderTest).getResources();
         when(mResources.getString(anyInt())).thenReturn("Error Message");
@@ -47,13 +46,19 @@ public class RouteFinderActivityTest extends TestCase {
     @Test
     public void testActivitySetUpCorrectlyWithMapFragmentAdded() {
         mClassUnderTest.onCreate(null);
-        verify(mClassUnderTest, times(1)).getMapFragment();
+        verify(mClassUnderTest, times(1)).buildMapFragment();
     }
 
     @Test
     public void testOnCreateBindsButterKnifeViews() {
         mClassUnderTest.onCreate(null);
         verify(mClassUnderTest, times(1)).bindViews();
+    }
+
+    @Test
+    public void testOnCreateBuildsPresenter() {
+        mClassUnderTest.onCreate(null);
+        verify(mClassUnderTest, times(1)).buildRouterFinderPresenter();
     }
 
     @Test
@@ -70,13 +75,6 @@ public class RouteFinderActivityTest extends TestCase {
     public void testOnDestroyUnbindsButterKnifeViews() {
         mClassUnderTest.onDestroy();
         verify(mClassUnderTest, times(1)).unBindViews();
-    }
-
-    @Test
-    public void testNotEnteringAnyText_ThenPresenterIsNotCalled() {
-        mClassUnderTest.mDestinationLocation = new EditText(mContext);
-        mClassUnderTest.mDestinationLocation.setText("");
-        mClassUnderTest.sendLocation();
     }
 
     @After

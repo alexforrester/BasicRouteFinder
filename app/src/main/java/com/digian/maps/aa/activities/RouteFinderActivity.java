@@ -35,10 +35,11 @@ public class RouteFinderActivity extends Activity implements OnMapReadyCallback,
 
     private GoogleMap mMap;
     private RouterFinderPresenter mRouterFinderPresenter;
-    private GoogleMap.OnMyLocationChangeListener myLocationChangeListener = new GoogleMap.OnMyLocationChangeListener() {
+    private LatLng originLatLng;
+    private GoogleMap.OnMyLocationChangeListener originMyLocationChangeListener = new GoogleMap.OnMyLocationChangeListener() {
         @Override
         public void onMyLocationChange(final Location location) {
-            LatLng loc = new LatLng(location.getLatitude(), location.getLongitude());
+            LatLng loc = originLatLng = new LatLng(location.getLatitude(), location.getLongitude());
             if(mMap != null){
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(loc, 16.0f));
                 clearOnMyLocationChangeListener();
@@ -55,10 +56,10 @@ public class RouteFinderActivity extends Activity implements OnMapReadyCallback,
         Log.v(TAG, "onCreate(@Nullable Bundle savedInstanceState)");
         setContentView(R.layout.activity_route_finder);
 
-        MapFragment mapFragment = getMapFragment();
+        MapFragment mapFragment = buildMapFragment();
         mapFragment.getMapAsync(this);
 
-        mRouterFinderPresenter = RouterFinderPresenter.newInstance(this, this);
+        mRouterFinderPresenter = buildRouterFinderPresenter();
         bindViews();
     }
 
@@ -66,9 +67,10 @@ public class RouteFinderActivity extends Activity implements OnMapReadyCallback,
     public void onMapReady(GoogleMap map) {
         mMap = map;
         mMap.setMyLocationEnabled(true);
-        mMap.setOnMyLocationChangeListener(myLocationChangeListener);
+        mMap.setOnMyLocationChangeListener(originMyLocationChangeListener);
     }
 
+    @VisibleForTesting
     @OnClick(R.id.destination_button)
     void sendLocation() {
 
@@ -83,12 +85,18 @@ public class RouteFinderActivity extends Activity implements OnMapReadyCallback,
 
     @VisibleForTesting
     @NonNull
-    MapFragment getMapFragment() {
+    MapFragment buildMapFragment() {
         MapFragment mapFragment = MapFragment.newInstance();
         FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
         fragmentTransaction.add(R.id.fragment_container, mapFragment);
         fragmentTransaction.commit();
         return mapFragment;
+    }
+
+    @VisibleForTesting
+    @NonNull
+    RouterFinderPresenter buildRouterFinderPresenter() {
+        return RouterFinderPresenter.newInstance(this, this);
     }
 
     @Override
