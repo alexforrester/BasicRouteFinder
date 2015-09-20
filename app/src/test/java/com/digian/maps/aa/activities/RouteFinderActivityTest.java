@@ -76,7 +76,6 @@ public class RouteFinderActivityTest extends TestCase {
     public void testOnDestroyUnbindsButterKnifeViews() {
         mClassUnderTest.onDestroy();
         verify(mClassUnderTest, times(1)).unBindViews();
-        verify(mClassUnderTest, times(1)).clearMembers();
     }
 
     @After

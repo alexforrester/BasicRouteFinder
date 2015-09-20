@@ -23,9 +23,11 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 
+import java.util.Arrays;
 import java.util.List;
 
 import butterknife.Bind;
@@ -127,12 +129,43 @@ public class RouteFinderActivity extends Activity implements OnMapReadyCallback,
         List<LatLng> latLngPoints = polylineOptions.getPoints();
         LatLng lastPoint = latLngPoints.get(latLngPoints.size() - 1);
 
-        Log.d(TAG,"Last Point Lat: "+lastPoint.latitude);
-        Log.d(TAG,"Last Point Lng: "+lastPoint.longitude);
+        List<LatLng> mapBounds =  getCorrectRectangularMapBoundCoordinates(mOriginLatLng,lastPoint);
+
         mMap.addMarker(new MarkerOptions().position(lastPoint).title(mDestination));
 
-        //LatLngBounds routeMapBounds = new LatLngBounds(mOriginLatLng, lastPoint);
-        //mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(routeMapBounds, 0));
+        LatLngBounds routeMapBounds = new LatLngBounds(mapBounds.get(0), mapBounds.get(1));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(routeMapBounds, 60));
+    }
+
+    private List<LatLng> getCorrectRectangularMapBoundCoordinates(LatLng firstPoint, LatLng secondPoint) {
+
+        double southWestLatitude;
+        double southWestLongitude;
+        double northEastLatitude;
+        double northEastLongitude;
+
+        if (firstPoint.latitude < secondPoint.latitude) {
+            southWestLatitude = firstPoint.latitude;
+            northEastLatitude = secondPoint.latitude;
+        }
+        else {
+            southWestLatitude = secondPoint.latitude;
+            northEastLatitude = firstPoint.latitude;
+        }
+
+        if (firstPoint.longitude > secondPoint.longitude) {
+            northEastLongitude = firstPoint.longitude;
+            southWestLongitude = secondPoint.longitude;
+        }
+        else {
+            northEastLongitude = secondPoint.longitude;
+            southWestLongitude = firstPoint.longitude;
+        }
+
+        LatLng southWest = new LatLng(southWestLatitude,southWestLongitude);
+        LatLng northEast = new LatLng(northEastLatitude,northEastLongitude);
+
+        return Arrays.asList(new LatLng[]{southWest,northEast});
     }
 
     @Override
@@ -145,7 +178,6 @@ public class RouteFinderActivity extends Activity implements OnMapReadyCallback,
     protected void onDestroy() {
         Log.v(TAG, "onDestroy()");
         unBindViews();
-        clearMembers();
         super.onDestroy();
     }
 
@@ -159,14 +191,6 @@ public class RouteFinderActivity extends Activity implements OnMapReadyCallback,
     void unBindViews(){
         Log.v(TAG, "unBindViews()");
         ButterKnife.unbind(this);
-    }
-
-    @VisibleForTesting
-    void clearMembers() {
-        Log.v(TAG, "clearMembers()");
-        mRouterFinderPresenter = null;
-        mMap = null;
-        mOriginLatLng = null;
     }
 
     private void clearOnMyLocationChangeListener() {
