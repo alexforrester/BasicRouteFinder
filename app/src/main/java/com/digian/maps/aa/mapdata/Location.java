@@ -8,10 +8,16 @@ import com.google.gson.annotations.SerializedName;
 public class Location {
 
     @SerializedName("lat")
-    private String lat;
+    private double lat;
 
     @SerializedName("lng")
-    private String lng;
+    private double lng;
 
+    public double getLat() {
+        return lat;
+    }
 
+    public double getLng() {
+        return lng;
+    }
 }

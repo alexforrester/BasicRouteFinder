@@ -2,4 +2,7 @@
     <string name="app_name">AA Route Finder</string>
     <string name="R.string.go">GO</string>
     <string name="no_text_entered">No Text Entered</string>
+    <string name="route_start">Route Start</string>
+    <string name="no_routes_returned">No routes returned for this destination</string>
+    <string name="no_legs_returned">No legs returned for this route</string>
 </resources>

@@ -10,4 +10,9 @@ public class Constants {
     public static final String ORIGIN_LOCATION = "ORIGIN_LOCATION";
     public static final String GOOGLE_DIRECTIONS_API_REQUEST_HOST = "https://maps.googleapis.com";
     public static final String GOOGLE_MAPS_KEY = "AIzaSyDkgbxWm3YsHn7OM7EkuVY6ltUpE2KFKgk";
+    public static final String BROADCAST_MAP_RETRIEVED_SUCCESS = "BROADCAST_MAP_RETRIEVED_SUCCESS";
+    public static final String BROADCAST_MAP_RETRIEVED_FAILURE = "BROADCAST_MAP_RETRIEVED_FAILURE";
+    public static final String POLYLINE_OPTIONS_DATA = "POLYLINE_OPTIONS_DATA";
+    public static final String FAILURE_ERROR_MESSAGE = "FAILURE_ERROR_MESSAGE";
+    public static final CharSequence STATUS_OK = "OK";
 }

@@ -1,8 +1,8 @@
 package com.digian.maps.aa.activities;
 
-import android.content.Context;
 import android.content.res.Resources;
 
+import com.digian.maps.aa.presenters.RouterFinderPresenter;
 import com.digian.maps.aa.views.RouteFinderView;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -30,13 +30,14 @@ public class RouteFinderActivityTest extends TestCase {
 
     RouteFinderActivity mClassUnderTest;
     MapFragment mMapFragment = mock(MapFragment.class);
-    Context mContext = mock(Context.class);
     Resources mResources =  mock(Resources.class);
+    RouterFinderPresenter mRouterFinderPresenter  = mock(RouterFinderPresenter.class);
 
     @Before
     public void setUp() {
         mClassUnderTest = spy(new RouteFinderActivity());
         doReturn(mMapFragment).when(mClassUnderTest).buildMapFragment();
+        doReturn(mRouterFinderPresenter).when(mClassUnderTest).buildRouterFinderPresenter();
         doNothing().when(mClassUnderTest).bindViews();
         doReturn(mResources).when(mClassUnderTest).getResources();
         when(mResources.getString(anyInt())).thenReturn("Error Message");
@@ -75,6 +76,7 @@ public class RouteFinderActivityTest extends TestCase {
     public void testOnDestroyUnbindsButterKnifeViews() {
         mClassUnderTest.onDestroy();
         verify(mClassUnderTest, times(1)).unBindViews();
+        verify(mClassUnderTest, times(1)).clearMembers();
     }
 
     @After

@@ -3,6 +3,7 @@ package com.digian.maps.aa.services;
 import android.content.Intent;
 import android.location.Location;
 import android.os.Build;
+import android.support.annotation.NonNull;
 
 import com.digian.maps.aa.BuildConfig;
 import com.digian.maps.aa.Constants;
@@ -14,7 +15,9 @@ import com.digian.maps.aa.network.RouteFinderRequestResult;
 import junit.framework.TestCase;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
@@ -33,6 +36,9 @@ public class RouteFinderServiceTest extends TestCase {
     private static final double LAT_AND_LON_VALUE = 5.0;
     private Location originLocation;
 
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
+
     static {
         ShadowLog.stream = System.out;
     }
@@ -44,14 +50,13 @@ public class RouteFinderServiceTest extends TestCase {
         originLocation = new Location(LOCATION_PROVIDER);
         originLocation.setLatitude(LAT_AND_LON_VALUE);
         originLocation.setLongitude(LAT_AND_LON_VALUE);
-
-        mStartServiceIntent.putExtra(Constants.ORIGIN_LOCATION, originLocation);
-        mStartServiceIntent.putExtra(Constants.DESTINATION_LOCATION, TestConstants.PICCADILLY_CIRCUS_POSTCODE);
     }
 
     @Test
     public void testOnHandleIntentHasRouteFinderDestinationPlotter_ThenRouteFinderRequestHelperCalled() throws Exception {
 
+        mStartServiceIntent.putExtra(Constants.ORIGIN_LOCATION, originLocation);
+        mStartServiceIntent.putExtra(Constants.DESTINATION_LOCATION, TestConstants.PICCADILLY_CIRCUS_POSTCODE);
         mClassUnderTest = new RouteFinderServiceMock();
         mClassUnderTest.onCreate();
         mClassUnderTest.onHandleIntent(mStartServiceIntent);
@@ -62,10 +67,43 @@ public class RouteFinderServiceTest extends TestCase {
     }
 
     @Test
+    public void testIllegalStateExceptionThrownIfOriginLocationNotSentInBundle() throws Exception {
+        thrown.expect(IllegalStateException.class);
+        mStartServiceIntent.putExtra(Constants.DESTINATION_LOCATION, TestConstants.PICCADILLY_CIRCUS_POSTCODE);
+        mClassUnderTest = new RouteFinderServiceMock();
+        mClassUnderTest.onCreate();
+        mClassUnderTest.onHandleIntent(mStartServiceIntent);
+    }
+
+    @Test
+    public void testIllegalStateExceptionThrownIfDestinationLocationNotSentInBundle() throws Exception {
+        thrown.expect(IllegalStateException.class);
+        mStartServiceIntent.putExtra(Constants.ORIGIN_LOCATION, originLocation);
+        mClassUnderTest = new RouteFinderServiceMock();
+        mClassUnderTest.onCreate();
+        mClassUnderTest.onHandleIntent(mStartServiceIntent);
+    }
+
+    @Test
+    public void testIllegalStateExceptionThrownIfPolylineOptionsNotPassedToRouteFinderRequestResultSuccess() throws Exception {
+        thrown.expect(IllegalStateException.class);
+
+        RouteFinderRequestResult routeFinderRequestResult =  new RouteFinderServiceMock();
+        routeFinderRequestResult.onRequestSuccess(null);
+    }
+
+    @Test
+    public void testIllegalStateExceptionThrownIfErrorMessagesNotPassedToRouteFinderRequestResultFailure() throws Exception {
+        thrown.expect(IllegalStateException.class);
+
+        RouteFinderRequestResult routeFinderRequestResult =  new RouteFinderServiceMock();
+        routeFinderRequestResult.onRequestFailure(null);
+    }
+
+    @Test
     public void testServiceImplementsRouteFinderRequestResult() throws Exception {
 
         mClassUnderTest = new RouteFinderServiceMock();
-
         assertTrue("class needs to implement RouteFinderRequestResult so success or failure can be broadcast back to presenter", mClassUnderTest instanceof RouteFinderRequestResult);
     }
 
@@ -80,9 +118,10 @@ public class RouteFinderServiceTest extends TestCase {
         }
 
         @Override
-        void sendRouteFinderRequest(final Location origin, final String requestString) {
+        void sendRouteFinderRequest(@NonNull final Location origin,@NonNull final String destinationLocation) {
+            super.sendRouteFinderRequest(origin, destinationLocation);
             originLocation = origin;
-            destinationLocation = requestString;
+            this.destinationLocation = destinationLocation;
             routeFinderRequestCalled = true;
         }
     }

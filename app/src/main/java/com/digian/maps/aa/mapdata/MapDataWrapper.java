@@ -12,6 +12,14 @@ public class MapDataWrapper {
     @SerializedName("status")
     private String Status;
 
+    public String getStatus() {
+        return Status;
+    }
+
+    public List<Route> getRoutes() {
+        return routes;
+    }
+
     @SerializedName("routes")
     private List<Route> routes;
 

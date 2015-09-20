@@ -1,6 +1,5 @@
 package com.digian.maps.aa.mapdata;
 
-
 import com.google.gson.annotations.SerializedName;
 
 /**
@@ -16,5 +15,17 @@ public class Step {
 
     @SerializedName("polyline")
     private Polyline polyline;
+
+    public Polyline getPolyline() {
+        return polyline;
+    }
+
+    public Location getStartLocation() {
+        return startLocation;
+    }
+
+    public Location getEndLocation() {
+        return endLocation;
+    }
 }
 

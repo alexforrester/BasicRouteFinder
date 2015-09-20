@@ -11,4 +11,8 @@ public class Route {
 
     @SerializedName("legs")
     private List<Leg> legs;
+
+    public List<Leg> getLegs() {
+        return legs;
+    }
 }

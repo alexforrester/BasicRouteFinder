@@ -11,4 +11,8 @@ public class Leg {
 
     @SerializedName("steps")
     private List<Step> steps;
+
+    public List<Step> getSteps() {
+        return steps;
+    }
 }
