@@ -86,6 +86,4 @@ public class RouterFinderPresenterTest extends TestCase {
         void setUpMapDataStateReceiver() {
         }
     }
-
-
 }

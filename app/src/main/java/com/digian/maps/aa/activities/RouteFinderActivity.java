@@ -10,11 +10,16 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.digian.maps.aa.Constants;
 import com.digian.maps.aa.R;
 import com.digian.maps.aa.presenters.RouterFinderPresenter;
 import com.digian.maps.aa.views.RouteFinderView;
@@ -24,7 +29,9 @@ import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 
 import java.util.Arrays;
@@ -42,11 +49,16 @@ public class RouteFinderActivity extends Activity implements OnMapReadyCallback,
 
     private static final String TAG = RouteFinderActivity.class.getSimpleName();
 
+    private ProgressBar mProgressBar;
     private GoogleMap mMap;
     private RouterFinderPresenter mRouterFinderPresenter;
     private LatLng mOriginLatLng;
+    private LatLng mDestinationLatLng;
     private String mDestination;
-    private com.google.android.gms.maps.model.Polyline mPolylineAdded;
+    private Marker mOriginMarker;
+    private Marker mDestinationMarker;
+    private PolylineOptions mPolylineOptions;
+    private Polyline mPolylineAdded;
     private GoogleMap.OnMyLocationChangeListener originMyLocationChangeListener = new GoogleMap.OnMyLocationChangeListener() {
         @Override
         public void onMyLocationChange(final Location location) {
@@ -79,7 +91,11 @@ public class RouteFinderActivity extends Activity implements OnMapReadyCallback,
         Log.v(TAG, "onMapReady(GoogleMap map)");
         mMap = map;
         mMap.setMyLocationEnabled(true);
-        mMap.setOnMyLocationChangeListener(originMyLocationChangeListener);
+
+        if (mDestinationLatLng != null)
+            showDrawnRouteFinderMap(mPolylineOptions);
+        else
+            mMap.setOnMyLocationChangeListener(originMyLocationChangeListener);
     }
 
     @VisibleForTesting
@@ -88,6 +104,8 @@ public class RouteFinderActivity extends Activity implements OnMapReadyCallback,
         Log.v(TAG, "sendLocation()");
 
         if (mPolylineAdded != null) mPolylineAdded.remove();
+        if (mOriginMarker != null) mOriginMarker.remove();
+        if (mDestinationMarker != null) mDestinationMarker.remove();
 
         if (mDestinationLocation == null || mDestinationLocation.getText() == null || mDestinationLocation.getText().length() == 0){
             displayError(getResources().getString(R.string.no_text_entered));
@@ -99,6 +117,31 @@ public class RouteFinderActivity extends Activity implements OnMapReadyCallback,
         mRouterFinderPresenter.getRouteLegs(originlocation, mDestination);
 
         hideKeyboard();
+        showProgressBar();
+    }
+
+    private void showProgressBar() {
+        FrameLayout frameLayout = (FrameLayout) findViewById(R.id.fragment_container);
+
+        if (mProgressBar == null) {
+            mProgressBar = new ProgressBar(this.getApplicationContext(), null, android.R.attr.progressBarStyleSmall);
+            FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(80, 80, Gravity.CENTER_HORIZONTAL|Gravity.TOP);
+            mProgressBar.setLayoutParams(params);
+            mProgressBar.setIndeterminate(true);
+            mProgressBar.setVisibility(View.VISIBLE);
+            frameLayout.addView(mProgressBar);
+        }
+        else if (mProgressBar.getVisibility() == View.INVISIBLE)
+        {
+            mProgressBar.setVisibility(View.VISIBLE);
+        }
+
+    }
+
+    private void hideProgressBar() {
+        if (mProgressBar != null) {
+            mProgressBar.setVisibility(View.INVISIBLE);
+        }
     }
 
     @VisibleForTesting
@@ -120,19 +163,67 @@ public class RouteFinderActivity extends Activity implements OnMapReadyCallback,
     }
 
     @Override
-    public void displayRoute(PolylineOptions polylineOptions) {
+    public void displayRoute(@NonNull final PolylineOptions polylineOptions) {
         Log.v(TAG, "displayRoute(PolylineOptions polylineOptions)");
 
         polylineOptions.width(6).color(Color.BLUE).geodesic(true);
-        mMap.addMarker(new MarkerOptions().position(mOriginLatLng).title(getString(R.string.route_start)));
-        mPolylineAdded = mMap.addPolyline(polylineOptions);
+        mPolylineOptions = polylineOptions;
         List<LatLng> latLngPoints = polylineOptions.getPoints();
-        LatLng lastPoint = latLngPoints.get(latLngPoints.size() - 1);
+        mDestinationLatLng = latLngPoints.get(latLngPoints.size() - 1);
 
-        List<LatLng> mapBounds =  getCorrectRectangularMapBoundCoordinates(mOriginLatLng,lastPoint);
+        showDrawnRouteFinderMap(mPolylineOptions);
+    }
 
-        mMap.addMarker(new MarkerOptions().position(lastPoint).title(mDestination));
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        mOriginLatLng = savedInstanceState.getParcelable(Constants.ORIGIN_LAT_LNG);
+        mDestinationLatLng = savedInstanceState.getParcelable(Constants.DESTINATION_LAT_LNG);
+        mPolylineOptions = savedInstanceState.getParcelable(Constants.DRAWN_POLYLINE_OPTIONS);
+        mDestination = savedInstanceState.getString(Constants.DESTINATION_TITLE);
+    }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putParcelable(Constants.ORIGIN_LAT_LNG, mOriginLatLng);
+        outState.putParcelable(Constants.DESTINATION_LAT_LNG, mDestinationLatLng);
+        outState.putParcelable(Constants.DRAWN_POLYLINE_OPTIONS,mPolylineOptions);
+        outState.putString(Constants.DESTINATION_TITLE, mDestination);
+    }
+
+    @Override
+    public void displayError(final String errorMessage) {
+        Log.v(TAG, "displayError(final String errorMessage)");
+        Toast.makeText(this.getApplicationContext(),errorMessage,Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    protected void onDestroy() {
+        Log.v(TAG, "onDestroy()");
+        unBindViews();
+        super.onDestroy();
+    }
+
+    @VisibleForTesting
+    void bindViews(){
+        Log.v(TAG, "bindViews()");
+        ButterKnife.bind(this);
+    }
+
+    @VisibleForTesting
+    void unBindViews(){
+        Log.v(TAG, "unBindViews()");
+        ButterKnife.unbind(this);
+    }
+
+    private void showDrawnRouteFinderMap(final PolylineOptions polylineOptions) {
+        hideProgressBar();
+        List<LatLng> mapBounds = getCorrectRectangularMapBoundCoordinates(mOriginLatLng, mDestinationLatLng);
+        addDestinationMarker();
+        addOriginMarker();
+        addPolyline(polylineOptions);
         LatLngBounds routeMapBounds = new LatLngBounds(mapBounds.get(0), mapBounds.get(1));
         mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(routeMapBounds, 60));
     }
@@ -165,32 +256,7 @@ public class RouteFinderActivity extends Activity implements OnMapReadyCallback,
         LatLng southWest = new LatLng(southWestLatitude,southWestLongitude);
         LatLng northEast = new LatLng(northEastLatitude,northEastLongitude);
 
-        return Arrays.asList(new LatLng[]{southWest,northEast});
-    }
-
-    @Override
-    public void displayError(final String errorMessage) {
-        Log.v(TAG, "displayError(final String errorMessage)");
-        Toast.makeText(this.getApplicationContext(),errorMessage,Toast.LENGTH_LONG).show();
-    }
-
-    @Override
-    protected void onDestroy() {
-        Log.v(TAG, "onDestroy()");
-        unBindViews();
-        super.onDestroy();
-    }
-
-    @VisibleForTesting
-    void bindViews(){
-        Log.v(TAG, "bindViews()");
-        ButterKnife.bind(this);
-    }
-
-    @VisibleForTesting
-    void unBindViews(){
-        Log.v(TAG, "unBindViews()");
-        ButterKnife.unbind(this);
+        return Arrays.asList(new LatLng[]{southWest, northEast});
     }
 
     private void clearOnMyLocationChangeListener() {
@@ -198,8 +264,20 @@ public class RouteFinderActivity extends Activity implements OnMapReadyCallback,
         mMap.setOnMyLocationChangeListener(null);
     }
 
+    private void addPolyline(final PolylineOptions polylineOptions) {
+        mPolylineAdded = mMap.addPolyline(polylineOptions);
+    }
+
     private void hideKeyboard() {
         InputMethodManager inputManager = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
         inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+    }
+
+    private void addDestinationMarker() {
+        mDestinationMarker = mMap.addMarker(new MarkerOptions().position(mDestinationLatLng).title(mDestination));
+    }
+
+    private void addOriginMarker() {
+        mOriginMarker = mMap.addMarker(new MarkerOptions().position(mOriginLatLng).title(getString(R.string.route_start)));
     }
 }

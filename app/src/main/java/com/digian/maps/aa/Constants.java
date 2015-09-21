@@ -15,4 +15,9 @@ public class Constants {
     public static final String POLYLINE_OPTIONS_DATA = "POLYLINE_OPTIONS_DATA";
     public static final String FAILURE_ERROR_MESSAGE = "FAILURE_ERROR_MESSAGE";
     public static final CharSequence STATUS_OK = "OK";
+    public static final String ORIGIN_LAT_LNG = "ORIGIN_LAT_LNG";
+    public static final String DESTINATION_LAT_LNG = "DESTINATION_LAT_LNG";
+    public static final String DRAWN_POLYLINE_OPTIONS = "DRAWN_POLYLINE_OPTIONS";
+    public static final String UK_REGION = "uk";
+    public static final String DESTINATION_TITLE = "DESTINATION_TITLE";
 }

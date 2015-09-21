@@ -12,5 +12,5 @@ import retrofit.http.Query;
 public interface RouteFinderRequest {
 
         @GET("/maps/api/directions/json")
-        Call<MapDataWrapper> getMapData(@Query("origin") String orig, @Query("destination") String dest, @Query("mapKey") String mapKey );
+        Call<MapDataWrapper> getMapData(@Query("origin") String orig, @Query("destination") String dest, @Query("region") String reg, @Query("mapKey") String mapKey );
 }

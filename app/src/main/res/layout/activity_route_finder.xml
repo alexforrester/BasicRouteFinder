@@ -19,6 +19,7 @@
         android:paddingTop="@dimen/activity_vertical_margin_zero">
 
         <EditText
+            android:inputType="text"
             android:id="@+id/destination_location"
             android:textSize="14sp"
             android:layout_width="0dp"
@@ -27,7 +28,7 @@
 
         <Button
             android:id="@+id/destination_button"
-            android:text="@string/R.string.go"
+            android:text="@string/submit_routerfinder_label"
             android:layout_width="0dp"
             android:layout_height="50dp"
             android:layout_weight="1"/>

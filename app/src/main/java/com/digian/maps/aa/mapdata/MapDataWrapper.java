@@ -23,6 +23,4 @@ public class MapDataWrapper {
     @SerializedName("routes")
     private List<Route> routes;
 
-
-
 }

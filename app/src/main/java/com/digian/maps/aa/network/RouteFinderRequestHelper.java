@@ -29,9 +29,8 @@ import retrofit.Retrofit;
  */
 public class RouteFinderRequestHelper {
 
-    @VisibleForTesting
-    RouteFinderRequestResult mRouteFinderRequestResult;
-    Context mContext;
+    @VisibleForTesting RouteFinderRequestResult mRouteFinderRequestResult;
+    @VisibleForTesting Context mContext;
 
     private static final String TAG = RouteFinderRequestHelper.class.getSimpleName();
 
@@ -40,7 +39,7 @@ public class RouteFinderRequestHelper {
         return new RouteFinderRequestHelper(context, routeFinderRequestResult);
     }
 
-    private RouteFinderRequestHelper(final Context context, @NonNull RouteFinderRequestResult routeFinderRequestResult) {
+    private RouteFinderRequestHelper(@NonNull final Context context, @NonNull final RouteFinderRequestResult routeFinderRequestResult) {
         Log.v(TAG,"RouteFinderRequestHelper(RouteFinderRequestResult routeFinderRequestResult)");
 
         if (context == null) throw new IllegalStateException("context cannot be null");
@@ -60,7 +59,7 @@ public class RouteFinderRequestHelper {
 
         RouteFinderRequest routeFinderRequest = retrofit.create(RouteFinderRequest.class);
 
-        Call<MapDataWrapper> call = routeFinderRequest.getMapData(origin,destination,Constants.GOOGLE_MAPS_KEY);
+        Call<MapDataWrapper> call = routeFinderRequest.getMapData(origin,destination,Constants.UK_REGION,Constants.GOOGLE_MAPS_KEY);
 
         call.enqueue(new Callback<MapDataWrapper>() {
             @Override
@@ -78,7 +77,7 @@ public class RouteFinderRequestHelper {
         });
     }
 
-    void processMapData(MapDataWrapper mapDataWrapper) {
+    private void processMapData(MapDataWrapper mapDataWrapper) {
         Log.v(TAG,"processMapData(MapDataWrapper mapDataWrapper)");
 
         //Check Status and if not Ok report back error
@@ -87,7 +86,6 @@ public class RouteFinderRequestHelper {
             return;
         }
 
-        //Create Iterable<LatLng> and use PolylineOptions.addAll(Iterable<LatLng>)
         List<Route> routes = mapDataWrapper.getRoutes();
 
         if (routes == null || routes.size() == 0) {
@@ -128,7 +126,7 @@ public class RouteFinderRequestHelper {
      * */
     private List<LatLng> decodePoly(String encoded) {
 
-        List<LatLng> poly = new ArrayList<LatLng>();
+        List<LatLng> poly = new ArrayList<>();
         int index = 0, len = encoded.length();
         int lat = 0, lng = 0;
 

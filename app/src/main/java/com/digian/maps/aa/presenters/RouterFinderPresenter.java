@@ -22,9 +22,9 @@ public class RouterFinderPresenter {
 
     private static final String TAG = RouterFinderPresenter.class.getSimpleName();
 
-    final Context mContext;
-    final RouteFinderView mRoutFinderView;
-    final MapDataStateReceiver mMapDataStateReceiver;
+    @VisibleForTesting final Context mContext;
+    @VisibleForTesting final RouteFinderView mRoutFinderView;
+    @VisibleForTesting final MapDataStateReceiver mMapDataStateReceiver;
 
     public static RouterFinderPresenter newInstance(@NonNull final Context context, @NonNull final RouteFinderView routeFinderView) throws IllegalStateException {
         return new RouterFinderPresenter(context,routeFinderView);
@@ -69,13 +69,12 @@ public class RouterFinderPresenter {
         localBroadcastManager.registerReceiver(mMapDataStateReceiver, intentFilterMapFailure);
     }
 
-    void processSuccessfulMapData(PolylineOptions polylineOptions) {
+    void processSuccessfulMapData(@NonNull final PolylineOptions polylineOptions) {
         Log.v(TAG,"processSuccessfulMapData(PolylineOptions polylineOptions)");
         mRoutFinderView.displayRoute(polylineOptions);
-
     }
 
-    void processFailureMapData(String errorMessage) {
+    void processFailureMapData(@NonNull final String errorMessage) {
         Log.v(TAG,"processFailureMapData(String errorMessage)");
         mRoutFinderView.displayError(errorMessage);
     }
