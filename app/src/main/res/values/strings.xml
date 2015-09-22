@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">AA Route Finder</string>
+    <string name="app_name">Route Finder</string>
     <string name="submit_routerfinder_label">GO</string>
     <string name="no_text_entered">No Text Entered</string>
     <string name="route_start">Route Start</string>
